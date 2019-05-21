@@ -9,5 +9,7 @@
 
   <modules>
   	<module>springboot_mybatis_mutil_datasource</module>
+    <module>springboot_quickstart</module>
+    <module>springboot_file</module>
   </modules>
 </project>
