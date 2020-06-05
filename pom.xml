@@ -16,6 +16,7 @@
   <modules>
     <module>springboot-quickstart</module>
     <module>springboot-websocket</module>
+      <module>springboot-Quartz</module>
   </modules>
 
   <properties>
