@@ -18,6 +18,7 @@
     <module>springboot-websocket</module>
       <module>springboot-Quartz</module>
       <module>springboot-logback</module>
+    <module>springboot-swagger-beautify</module>
   </modules>
 
   <properties>
