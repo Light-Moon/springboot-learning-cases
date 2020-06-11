@@ -19,6 +19,7 @@
       <module>springboot-Quartz</module>
       <module>springboot-logback</module>
     <module>springboot-swagger-beautify</module>
+    <module>springboot-swagger</module>
   </modules>
 
   <properties>
