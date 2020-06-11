@@ -1,19 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<!--
+scan:当此属性设置为true时，配置文件如果发生改变，将会被重新加载，默认值为true。
+scanPeriod:设置监测配置文件是否有修改的时间间隔，如果没有给出时间单位，默认单位是毫秒。当scan为true时，此属性生效。默认的时间间隔为1分钟。
+debug:当此属性设置为true时，将打印出logback内部日志信息，实时查看logback运行状态。默认值为false。
+-->
+<configuration  scan="true" scanPeriod="60 seconds" debug="false">
+    <!-- 属性文件:在properties或yml文件中找到对应的配置项,通过修改配置项来调整日志目录或级别 -->
+    <springProperty scope="context" name="logging.path"  source="logging.path"/>
+    <springProperty scope="context" name="logging.level" source="logging.level.springboot.logback"/>
+
     <property name="FILE_ERROR_PATTERN"
               value="${FILE_LOG_PATTERN:-%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} %file:%line: %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <!--appender 负责写日志的组件-->
+    <!--定义一个输出到控制台的appender-->
+    <!-- 默认的控制台日志输出，一般生产环境都是后台启动，这个没太大作用 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>INFO</level>
         </filter>
         <encoder>
-            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <!--<pattern>${CONSOLE_LOG_PATTERN}</pattern>-->
+            <Pattern>%d{HH:mm:ss.SSS} %-5level %logger{80} - %msg%n</Pattern>
             <charset>UTF-8</charset>
         </encoder>
     </appender>
 
     <appender name="FILE_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--如果是 true，日志被追加到文件结尾，如果是false，清空现存文件，默认是true。-->
+        <append>true</append>
         <!--如果只是想要 Info 级别的日志，只是过滤 info 还是会输出 Error 日志，因为 Error 的级别高， 所以我们使用下面的策略，可以避免输出 Error 的日志-->
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <!--过滤 Error-->
@@ -24,7 +39,7 @@
             <onMismatch>ACCEPT</onMismatch>
         </filter>
         <!--日志名称，如果没有File 属性，那么只会使用FileNamePattern的文件路径规则如果同时有<File>和<FileNamePattern>，那么当天日志是<File>，明天会自动把今天的日志改名为今天的日期。即，<File> 的日志都是当天的。-->
-        <!--<File>logs/info.spring-boot-demo-logback.log</File>-->
+        <File>logs/info.springboot-logback.log</File>
         <!--滚动策略，按照时间滚动 TimeBasedRollingPolicy-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--文件路径,定义了日志的切分方式——把每一天的日志归档到一个文件中,以防止日志填满整个磁盘空间-->
@@ -41,12 +56,14 @@
         <!--<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">-->
         <!--<maxFileSize>1KB</maxFileSize>-->
         <!--</triggeringPolicy>-->
-        <encoder>
-            <pattern>${FILE_LOG_PATTERN}</pattern>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <!--<pattern>${FILE_LOG_PATTERN}</pattern>-->
             <charset>UTF-8</charset> <!-- 此处设置字符集 -->
         </encoder>
     </appender>
 
+    <!--定义一个只打印error级别日志的appcener-->
     <appender name="FILE_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!--如果只是想要 Error 级别的日志，那么需要过滤一下，默认是 info 级别的，ThresholdFilter-->
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -57,7 +74,7 @@
         <!--滚动策略，按照时间滚动 TimeBasedRollingPolicy-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--文件路径,定义了日志的切分方式——把每一天的日志归档到一个文件中,以防止日志填满整个磁盘空间-->
-            <FileNamePattern>logs/spring-boot-demo-logback/error.created_on_%d{yyyy-MM-dd}.part_%i.log</FileNamePattern>
+            <FileNamePattern>logs/springboot-logback/error.created_on_%d{yyyy-MM-dd}.part_%i.log</FileNamePattern>
             <!--只保留最近90天的日志-->
             <maxHistory>90</maxHistory>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
@@ -66,14 +83,61 @@
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
         <encoder>
-            <pattern>${FILE_ERROR_PATTERN}</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <!--<pattern>${FILE_ERROR_PATTERN}</pattern>-->
             <charset>UTF-8</charset> <!-- 此处设置字符集 -->
         </encoder>
     </appender>
 
+    <!--定义一个test appcener-->
+    <appender name="FILE_TEST"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${logging.level}</level>
+        </filter>
+        <!--日志名称，如果没有File 属性，那么只会使用FileNamePattern的文件路径规则如果同时有<File>和<FileNamePattern>，那么当天日志是<File>，明天会自动把今天的日志改名为今天的日期。即，<File> 的日志都是当天的。-->
+        <file>
+            ${logging.path}/test.log
+        </file>
+        <!--滚动策略，按照时间滚动 TimeBasedRollingPolicy-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--文件路径,定义了日志的切分方式——把每一天的日志归档到一个文件中,以防止日志填满整个磁盘空间-->
+            <FileNamePattern>${logging.path}/test.log.%d{yyyy-MM-dd}</FileNamePattern>
+            <!--只保留最近30天的日志-->
+            <MaxHistory>30</MaxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!--logger 用来设置某一个包或者具体的某一个类的日志打印级别以及指定appender。addtivity:用来描述是否向上级logger传递打印信息。默认是true。-->
+    <!--
+        下面的logger负责打印包com.example下的日志，不会打印在控制台，直接打印到FILE_ERROR日志组件指定的文件中，不过因为FILE_ERROR组件只允许ERROR级别，所以只能将ERROR级别的日志存进去。
+        同理，可以定义多个类似上面的不同的appender，然后通过多个类似下面的logger进行不同的指定，从而将不同类或包下的日志打印到不同位置.
+        上面定义了一个FILE_TEST供下面的logger使用，不过也要添加到下面的root里，否则不会打印到FILE_TEST指定的文件中
+     -->
+    <logger name="com.example" level="${logging.level}"
+            additivity="false">
+        <appender-ref ref="FILE_TEST" />
+    </logger>
+
     <root level="info">
+        <!--appender-ref则是用来指定具体appender的。-->
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE_INFO"/>
         <appender-ref ref="FILE_ERROR"/>
     </root>
+    <!--
+    logger/appender/root之间的关系:
+    root是根logger,所以他两是一回事；只不过root中不能有name和additivity属性，是有一个level。
+    appender是一个日志打印的组件，这里组件里面定义了打印过滤的条件、打印输出方式、滚动策略、编码方式、打印格式等等。
+    但是它仅仅是一个打印组件，如果我们不使用一个logger或者root的appender-ref指定某个具体的appender时，它就没有什么意义。
+    因此appender让我们的应用知道怎么打、打印到哪里、打印成什么样；而logger则是告诉应用哪些可以这么打。
+    例如某个类下的日志可以使用这个appender打印或者某个包下的日志可以这么打印。
+
+    ********详细配置说明可参考 https://juejin.im/post/5b51f85c5188251af91a7525  *********
+    -->
 </configuration>
