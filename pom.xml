@@ -20,6 +20,8 @@
       <module>springboot-logback</module>
     <module>springboot-swagger-beautify</module>
     <module>springboot-swagger</module>
+      <module>springboot-task-quartz</module>
+      <module>springboot-template-freemarker</module>
   </modules>
 
   <properties>
