@@ -1,0 +1,14 @@
+# 自定义的配置文件
+person:
+  maps1:   #对象、Map（属性和值）（键值对）多行定义形式
+    name1: xiaoming
+    name2: xiali
+    name3: zhoukai
+  maps2: {name1: yuer, name2: lihong}   #对象、Map（属性和值）（键值对）行内定义形式
+  list1: [11, 22, 33]  # 数组（List、Set）行内定义形式
+  list2:   # 数组（List、Set）多行定义形式
+    - 44
+    - 55
+    - 66
+  name: test
+

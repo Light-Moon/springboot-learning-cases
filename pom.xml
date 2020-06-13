@@ -22,6 +22,7 @@
     <module>springboot-swagger</module>
       <module>springboot-task-quartz</module>
       <module>springboot-template-freemarker</module>
+    <module>springboot-config</module>
   </modules>
 
   <properties>
