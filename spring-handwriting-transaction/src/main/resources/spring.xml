@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd">
+	<context:component-scan base-package="com.example"></context:component-scan>
+	<!--虽然可以通过编程的方式织入切面，但是一般情况下，我们还是使用spring的配置自动完成创建代理织入切面的工作。
+	通过aop命名空间的<aop:aspectj-autoproxy />声明自动为spring容器中那些配置@aspectJ切面的bean创建代理，织入切面。-->
+	<aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+
+	<!-- 1. 数据源对象: C3P0连接池 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="com.mysql.jdbc.Driver"></property>
+		<property name="jdbcUrl" value="jdbc:mysql://com.demo.spring:3306/test"></property>
+		<property name="user" value="root"></property>
+		<property name="password" value="ROOT"></property>
+	</bean>
+
+	<!-- 2. JdbcTemplate工具类实例 -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<!-- 3.配置事物 -->
+	<bean id="dataSourceTransactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+
+</beans>
