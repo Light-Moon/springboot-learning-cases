@@ -1,0 +1,12 @@
+server:
+  port: 8080
+
+library:
+  location: 广州南沙
+  books:
+    - name: 天才基本法
+      description: 讲述天才的成长
+    - name: 时间的质量
+      description: 四维空间
+    - name: 百花齐放
+      description: 文化与艺术的碰撞
