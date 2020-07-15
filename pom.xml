@@ -18,12 +18,15 @@
     <module>springboot-websocket</module>
       <module>springboot-Quartz</module>
       <module>springboot-logback</module>
-    <module>springboot-swagger-beautify</module>
-    <module>springboot-swagger</module>
+      <module>springboot-swagger-beautify</module>
+      <module>springboot-swagger</module>
       <module>springboot-task-quartz</module>
       <module>springboot-template-freemarker</module>
       <module>springboot-config</module>
       <module>spring-handwriting-transaction</module>
+    <module>springboot-restful</module>
+    <module>springboot-handle-exception</module>
+      <module>springboot-handle-exception-improved</module>
   </modules>
 
   <properties>
