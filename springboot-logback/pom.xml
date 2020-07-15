@@ -35,7 +35,7 @@
     </dependencies>
 
     <build>
-        <finalName>spring-boot-demo-logback</finalName>
+        <finalName>springboot-logback</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

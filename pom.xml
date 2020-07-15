@@ -22,8 +22,8 @@
     <module>springboot-swagger</module>
       <module>springboot-task-quartz</module>
       <module>springboot-template-freemarker</module>
-      <module>springboot-restful</module>
-      <module>springboot-handle-exception</module>
+      <module>springboot-config</module>
+      <module>spring-handwriting-transaction</module>
   </modules>
 
   <properties>
