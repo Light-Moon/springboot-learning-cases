@@ -10,6 +10,13 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
+/**
+ * 路径参数请求方法示例
+ * 通配符路径参数内容的获取要用到自定义注解类WildcardParam和配置类WebMvcConfig。
+ *
+ * @author: QL Zhang
+ * @time: 2020/7/23 11:14
+ */
 @RestController
 @Slf4j
 public class PathParamController {

@@ -5,9 +5,11 @@ import com.example.restful.exception.FileStorageException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -18,11 +20,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,6 +43,8 @@ import java.nio.file.StandardCopyOption;
 @RestController
 @RequestMapping("/file")
 public class FileOperateController {
+    @Value("${file.uploadUrl}")
+    private String uploadUrl;
 
     /**
      * 文件上传（不友好不实用）
@@ -191,5 +194,107 @@ public class FileOperateController {
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
                 .body(resource);
+    }
+
+    /**
+     * 此功能接口是调用另一个服务中上传文件的RESTFUL接口来实现文件上传
+     * 另一个接口协议： post请求，接口方法类似于 public String upload(@PathVariable @NotEmpty String path, @RequestParam("file") @NotNull MultipartFile multipartFile){……}
+     *
+     * 主要参考：https://blog.csdn.net/wohaqiyi/article/details/77621517
+     * 相关资料：
+     * https://blog.csdn.net/liqing0013/article/details/95514125
+     * https://blog.csdn.net/qq_41117947/article/details/79361094
+     * https://stackoverflow.com/questions/34276466/simple-httpurlconnection-post-file-multipart-form-data-from-android-to-google-bl
+     *
+     * @author: QL Zhang
+     * @time: 2020/7/23 16:40
+     */
+    @PostMapping("/crossupload")
+    public Object crossUpload(@RequestParam("file") @NotNull MultipartFile multipartFile){
+        // check upload file
+        String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+        String result = "";
+        final String newLine = "\r\n";
+        final String boundaryPrefix = "--";
+        //定义数据分割线
+        String BOUNDARY = "========7d4a6d158c9";
+        //服务器的域名
+        try {
+            //创建连接
+            URL url = new URL(uploadUrl);
+            //声明一个抽象类URLConnection的引用urlConnection,此处的urlConnection对象实际上是根据URL的请求协议(此处是http)生成的URLConnection类的子类HttpURLConnection,故此处最好将其转化为HttpURLConnection类型的对象,以便用到HttpURLConnection更多的API.如下:
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            //设定请求方式为"POST"，默认为"GET"
+            connection.setRequestMethod(String.valueOf(HttpMethod.POST));
+            //发送post请求必须设置如下两行
+            //设置是否向HttpUrlConnction输出，因为这个是POST请求，参数要放在http正文内，因此需要设为true，默认情况下是false
+            connection.setDoOutput(true);
+            //设置是否向HttpUrlConnection读入，默认情况下是true
+            connection.setDoInput(true);
+            //POST请求不能使用缓存（POST不能被缓存）
+            connection.setUseCaches(false);
+            //设置请求头参数
+            connection.setRequestProperty("connection", "Keep-Alive");
+            connection.setRequestProperty("Charset", "UTF-8");
+            connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + BOUNDARY);
+
+            //connect()函数会根据HttpURLConnection对象的配置值 生成http头部信息，因此在调用connect函数之前，就必须把所有的配置准备好
+            //connection.connect();
+            //HttpURLConnection是基于HTTP协议的，其底层通过socket通信实现。如果不设置超时（timeout），在网络异常的情况下，可能会导致程序僵死而不继续往下执行。
+            //connection.setConnectTimeout(20*1000);//设置连接主机超时（单位：毫秒）
+            //connection.setReadTimeout(20*1000);//设置从主机读取数据超时（单位：毫秒）
+            //正文的内容是通过outputStream流写入的，实际上outputStream不是一个网络流，充其量是个字符串流，往里面写入的东西不会立即发送到网络，
+            //而是存在于内存缓冲区中，待outputStream流关闭时，根据输入的内容生成http正文。至此，http请求的东西已经全部准备就绪
+            OutputStream out = new DataOutputStream(connection.getOutputStream());
+
+            //上传文件
+            StringBuilder sb = new StringBuilder();
+            sb.append(boundaryPrefix);
+            sb.append(BOUNDARY);
+            sb.append(newLine);
+
+            // 文件参数,photo参数名可以随意修改
+            sb.append("Content-Disposition: form-data;name=\"file\";filename=\"" + fileName
+                    + "\"" + newLine);
+            sb.append("Content-Type:application/octet-stream");
+            // 参数头设置完以后需要两个换行，然后才是参数内容
+            sb.append(newLine);
+            sb.append(newLine);
+
+            // 将参数头的数据写入到输出流中
+            out.write(sb.toString().getBytes());
+
+            // 数据输入流,用于读取文件数据
+            DataInputStream in = new DataInputStream(multipartFile.getInputStream());
+            byte[] bufferOut = new byte[1024*8];
+            int bytes = 0;
+            // 每次读8KB数据,并且将文件数据写入到输出流中
+            while ((bytes = in.read(bufferOut)) != -1) {
+                out.write(bufferOut, 0, bytes);
+            }
+            // 最后添加换行
+            out.write(newLine.getBytes());
+            in.close();
+
+            // 定义最后数据分隔线，即--加上BOUNDARY再加上--。
+            byte[] end_data = (newLine + boundaryPrefix + BOUNDARY + boundaryPrefix + newLine)
+                    .getBytes();
+            // 写上结尾标识
+            out.write(end_data);
+            out.flush();
+            out.close();
+
+            // 定义BufferedReader输入流来读取URL的响应
+            // 对outputStream的写操作，又必须要在inputStream的读操作之前
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));// <===注意，实际发送请求的代码段就在这里
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                result += line; //这里读取的是上边url对应的上传文件接口的返回值，读取出来后，然后接着返回到前端，实现接口中调用接口的方式
+            }
+            log.info("文件上传响应结果：{}", result);
+        } catch (IOException e) {
+            log.error("上传文件的POST请求出现异常", e);
+        }
+        return result;
     }
 }

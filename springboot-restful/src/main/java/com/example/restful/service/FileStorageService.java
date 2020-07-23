@@ -18,12 +18,12 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 @Slf4j
-@Service("fileStorageService")
+@Service
 public class FileStorageService {
-    @Value("${file.upload-dir}")
+    @Value("${file.uploadDir}")
     private String uploadDir;
 
-    private final Path fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
+    //private final Path fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
     //TODO:待分析为啥注入失败
     //@Autowired
     //public FileStorageService() {
@@ -39,7 +39,7 @@ public class FileStorageService {
     public String storeFile(MultipartFile multipartFile){
         // Normalize file name
         String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
-
+        Path fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
         try {
             // Check if the file's name contains invalid characters
             if(fileName.contains("..")) {
@@ -47,7 +47,7 @@ public class FileStorageService {
             }
 
             // Copy file to the target location (Replacing existing file with the same name)
-            Path targetLocation = this.fileStorageLocation.resolve(fileName);
+            Path targetLocation = fileStorageLocation.resolve(fileName);
             Files.copy(multipartFile.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
             return fileName;
@@ -57,8 +57,9 @@ public class FileStorageService {
     }
 
     public Resource loadFileAsResource(String fileName) {
+        Path fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
         try {
-            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
+            Path filePath = fileStorageLocation.resolve(fileName).normalize();
             Resource resource = new UrlResource(filePath.toUri());
             if(resource.exists()) {
                 return resource;

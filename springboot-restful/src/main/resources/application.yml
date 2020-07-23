@@ -11,4 +11,5 @@ spring:
       max-request-size: 215MB
 
 file:
-  upload-dir: D:\zql
+  uploadDir: D:\zql
+  uploadUrl: http://10.142.90.152:10080/console.webctdfs/file/fangyi/test1
