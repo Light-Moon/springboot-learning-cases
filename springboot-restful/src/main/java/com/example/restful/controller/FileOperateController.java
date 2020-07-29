@@ -1,7 +1,9 @@
 package com.example.restful.controller;
 
+import com.example.restful.bean.HttpResponse;
 import com.example.restful.exception.FileNotFoundException;
 import com.example.restful.exception.FileStorageException;
+import com.example.restful.service.FileUploadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -45,6 +47,15 @@ import java.nio.file.StandardCopyOption;
 public class FileOperateController {
     @Value("${file.uploadUrl}")
     private String uploadUrl;
+
+    //multipart/form-data 格式发送数据时各个部分分隔符的前缀,必须为 --
+    private static final String BOUNDARY_PREFIX = "--";
+
+    //回车换行,用于一行的结尾
+    private static final String LINE_END = "\r\n";
+
+    @javax.annotation.Resource
+    private FileUploadService fileUploadService;
 
     /**
      * 文件上传（不友好不实用）
@@ -210,7 +221,7 @@ public class FileOperateController {
      * @time: 2020/7/23 16:40
      */
     @PostMapping("/crossupload")
-    public Object crossUpload(@RequestParam("file") @NotNull MultipartFile multipartFile){
+    public String crossUpload(@RequestParam("file") @NotNull MultipartFile multipartFile){
         // check upload file
         String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
         String result = "";
@@ -233,7 +244,7 @@ public class FileOperateController {
             connection.setDoInput(true);
             //POST请求不能使用缓存（POST不能被缓存）
             connection.setUseCaches(false);
-            //设置请求头参数
+            //设置请求头参数 长连接、字符编码、
             connection.setRequestProperty("connection", "Keep-Alive");
             connection.setRequestProperty("Charset", "UTF-8");
             connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + BOUNDARY);
@@ -287,7 +298,7 @@ public class FileOperateController {
             // 定义BufferedReader输入流来读取URL的响应
             // 对outputStream的写操作，又必须要在inputStream的读操作之前
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));// <===注意，实际发送请求的代码段就在这里
-            String line = null;
+            String line;
             while ((line = reader.readLine()) != null) {
                 result += line; //这里读取的是上边url对应的上传文件接口的返回值，读取出来后，然后接着返回到前端，实现接口中调用接口的方式
             }
@@ -296,5 +307,39 @@ public class FileOperateController {
             log.error("上传文件的POST请求出现异常", e);
         }
         return result;
+    }
+
+    @PostMapping("/crossupload2")
+    public HttpResponse crossUpload2(@RequestParam("file") @NotNull MultipartFile multipartFile){
+        HttpResponse response;
+        // check upload file
+        String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+        HttpURLConnection conn;
+        //定义数据分割线，可以任意设置，这里设置为 MyBoundary+ 时间戳（尽量复杂点，避免和正文重复）
+        String boundary = "MyBoundary" + System.currentTimeMillis();
+        try {
+            conn = fileUploadService.getHttpURLConnection(uploadUrl, null);
+            //设置 Content-Type 为 multipart/form-data; boundary=${boundary}
+            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+            DataOutputStream out = new DataOutputStream(conn.getOutputStream());
+            // 数据输入流,用于读取文件数据
+            DataInputStream in = new DataInputStream(multipartFile.getInputStream());
+            //写文件类型的表单参数
+            fileUploadService.writeFile("file", fileName, boundary, out, in);
+            out.flush();
+            in.close();
+            out.close();
+        } catch (IOException e) {
+            log.error("上传文件的POST请求出现异常", e);
+            response = new HttpResponse(500, e.getMessage());
+            return response;
+        }
+        return fileUploadService.getHttpResponse(conn);
+    }
+
+
+    @PostMapping("/crossdownload")
+    public Object crossDownload(@RequestParam("file") @NotNull MultipartFile multipartFile){
+        return null;
     }
 }
