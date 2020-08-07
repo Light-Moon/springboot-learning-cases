@@ -27,6 +27,7 @@
     <module>springboot-restful</module>
     <module>springboot-handle-exception</module>
       <module>springboot-handle-exception-improved</module>
+      <module>springboot-customrun</module>
   </modules>
 
   <properties>
