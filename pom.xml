@@ -28,6 +28,7 @@
     <module>springboot-handle-exception</module>
       <module>springboot-handle-exception-improved</module>
       <module>springboot-customrun</module>
+      <module>springboot-multi-datasource</module>
   </modules>
 
   <properties>

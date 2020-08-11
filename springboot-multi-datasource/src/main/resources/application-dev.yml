@@ -1,0 +1,23 @@
+logback:
+  name: springboot-multi-datasource
+  path: /data/log/
+  level: INFO
+  appender-ref: logfile
+
+jasypt:
+  encryptor:
+    algorithm: PBEWithMD5AndDES
+    pool-size: 10
+
+spring:
+  datasource:
+    tsdb:
+      jdbc-url: jdbc:mysql://localhost:3306/ctyun_tsdb?characterEncoding=utf-8&useSSL=false
+      username: ENC(Xb8YIYkMkFTia5JzcBor0hnc+dWeJ0DXFRoOimAt0n0=)
+      password: ENC(HNBpNtnBQwxprCF7bp5TaVU2srYgw1KXTQpJiDXfd14=)
+      driver-class-name: com.mysql.cj.jdbc.Driver
+    ctdfs:
+      jdbc-url: jdbc:mysql://localhost:3306/ctdfs_ecloud_joint?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=CTT&allowMultiQueries=true
+      username: ENC(oI64bvJCTcOpWPEZHPZ0VOtpK3Gn4dOZ)
+      password: ENC(SdQbXqfYjS8zTUIpMK+PAhKxTUmouJD3)
+      driver-class-name: com.mysql.cj.jdbc.Driver
