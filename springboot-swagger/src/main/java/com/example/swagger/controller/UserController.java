@@ -32,7 +32,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @ApiOperation(value = "主键查询（DONE）", notes = "备注")
-    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "用户编号", dataType = DataType.INT, paramType = ParamType.PATH)})
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "用户编号", dataType = DataType.LONG, paramType = ParamType.PATH)})
     public ApiResponse<User> get(@PathVariable Integer id) {
         log.info("单个参数用  @ApiImplicitParam");
         return ApiResponse.<User>builder().code(200)
