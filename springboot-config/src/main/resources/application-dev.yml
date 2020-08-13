@@ -2,11 +2,11 @@ server:
   port: 8080
 
 library:
-  location: ¹ãÖİÄÏÉ³
+  location: å¹¿å·å—æ²™
   books:
-    - name: Ìì²Å»ù±¾·¨
-      description: ½²ÊöÌì²ÅµÄ³É³¤
-    - name: Ê±¼äµÄÖÊÁ¿
-      description: ËÄÎ¬¿Õ¼ä
-    - name: °Ù»¨Æë·Å
-      description: ÎÄ»¯ÓëÒÕÊõµÄÅö×²
+    - name: å¤©æ‰åŸºæœ¬æ³•
+      description: è®²è¿°å¤©æ‰çš„æˆé•¿
+    - name: æ—¶é—´çš„è´¨é‡
+      description: å››ç»´ç©ºé—´
+    - name: ç™¾èŠ±é½æ”¾
+      description: æ–‡åŒ–ä¸è‰ºæœ¯çš„ç¢°æ’
