@@ -29,6 +29,8 @@
       <module>springboot-handle-exception-improved</module>
       <module>springboot-customrun</module>
       <module>springboot-multi-datasource</module>
+      <module>springboot-schedulerlock</module>
+      <module>springboot-swagger2word</module>
   </modules>
 
   <properties>
